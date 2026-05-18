@@ -145,7 +145,7 @@ func failureMessage(f *Failure) string {
 }
 
 // Run executes output verification against expected files.
-func Run(cfg Config) error {
+func Run(cfg Config) (err error) {
 	repro := reproduceCommand(cfg)
 
 	tmpDir, err := os.MkdirTemp("", "tagtools-verify-*")
@@ -153,7 +153,9 @@ func Run(cfg Config) error {
 		return errs.Wrap(err)
 	}
 	defer func() {
-		_ = os.RemoveAll(tmpDir)
+		if cerr := os.RemoveAll(tmpDir); cerr != nil {
+			err = errs.Join(err, errs.Wrap(cerr, errs.WithContext("path", tmpDir)))
+		}
 	}()
 
 	tagslistOut := filepath.Join(tmpDir, "tagslist.csv")
@@ -186,13 +188,16 @@ func Run(cfg Config) error {
 }
 
 func compareFile(expectedPath, actualPath string) error {
-	expected, err := os.ReadFile(expectedPath) // #nosec G304 -- verify reads caller-specified expected file.
+	cleanExpectedPath := filepath.Clean(expectedPath)
+	cleanActualPath := filepath.Clean(actualPath)
+
+	expected, err := os.ReadFile(cleanExpectedPath)
 	if err != nil {
-		return errs.Wrap(err, errs.WithContext("path", expectedPath))
+		return errs.Wrap(err, errs.WithContext("path", cleanExpectedPath))
 	}
-	actual, err := os.ReadFile(actualPath) // #nosec G304 -- verify reads generated file path for comparison.
+	actual, err := os.ReadFile(cleanActualPath)
 	if err != nil {
-		return errs.Wrap(err, errs.WithContext("path", actualPath))
+		return errs.Wrap(err, errs.WithContext("path", cleanActualPath))
 	}
 
 	if bytes.Equal(expected, actual) {
@@ -201,8 +206,8 @@ func compareFile(expectedPath, actualPath string) error {
 
 	lineNo, expectedLine, actualLine := firstDiffLine(expected, actual)
 	return &mismatch{
-		ExpectedPath: expectedPath,
-		ActualPath:   actualPath,
+		ExpectedPath: cleanExpectedPath,
+		ActualPath:   cleanActualPath,
 		Line:         lineNo,
 		ExpectedLine: expectedLine,
 		ActualLine:   actualLine,

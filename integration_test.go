@@ -27,7 +27,7 @@ func TestTagslistGolden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read expected: %v", err)
 	}
-	actual, err := os.ReadFile(out) // #nosec G304 -- out points to test-generated temp file.
+	actual, err := os.ReadFile(filepath.Clean(out))
 	if err != nil {
 		t.Fatalf("read actual: %v", err)
 	}
@@ -52,7 +52,7 @@ func TestToptagsGolden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read expected: %v", err)
 	}
-	actual, err := os.ReadFile(out) // #nosec G304 -- out points to test-generated temp file.
+	actual, err := os.ReadFile(filepath.Clean(out))
 	if err != nil {
 		t.Fatalf("read actual: %v", err)
 	}
