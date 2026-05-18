@@ -49,6 +49,9 @@ func run(args []string) error {
 		fs := pflag.NewFlagSet("tagslist", pflag.ContinueOnError)
 		struct2pflag.Bind(fs, &cfg)
 		if err := fs.Parse(subArgs); err != nil {
+			if errs.Is(err, pflag.ErrHelp) {
+				return nil
+			}
 			return errs.Wrap(err)
 		}
 		if err := tagslist.Run(cfg); err != nil {
@@ -61,6 +64,9 @@ func run(args []string) error {
 		fs := pflag.NewFlagSet("toptags", pflag.ContinueOnError)
 		struct2pflag.Bind(fs, &cfg)
 		if err := fs.Parse(subArgs); err != nil {
+			if errs.Is(err, pflag.ErrHelp) {
+				return nil
+			}
 			return errs.Wrap(err)
 		}
 		if err := toptags.Run(cfg); err != nil {
@@ -82,6 +88,9 @@ func run(args []string) error {
 		fs := pflag.NewFlagSet("verify", pflag.ContinueOnError)
 		struct2pflag.Bind(fs, &cfg)
 		if err := fs.Parse(subArgs); err != nil {
+			if errs.Is(err, pflag.ErrHelp) {
+				return nil
+			}
 			return errs.Wrap(err)
 		}
 		if err := verify.Run(cfg); err != nil {
