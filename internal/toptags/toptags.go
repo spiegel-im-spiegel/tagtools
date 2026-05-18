@@ -37,7 +37,7 @@ type countItem struct {
 }
 
 // Run executes the toptags workflow.
-func Run(cfg Config) error {
+func Run(cfg Config) (err error) {
 	today, err := resolveToday(cfg.Today)
 	if err != nil {
 		return errs.Wrap(err)
@@ -115,7 +115,9 @@ func Run(cfg Config) error {
 		return errs.Wrap(err, errs.WithContext("path", cfg.Out))
 	}
 	defer func() {
-		_ = f.Close()
+		if cerr := f.Close(); cerr != nil {
+			err = errs.Join(err, errs.Wrap(cerr, errs.WithContext("path", cfg.Out)))
+		}
 	}()
 
 	if _, err := f.WriteString("["); err != nil {

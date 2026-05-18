@@ -3,6 +3,7 @@ package frontmatter
 import (
 	"bufio"
 	"os"
+	"path/filepath"
 	"regexp"
 
 	"github.com/goark/errs"
@@ -22,19 +23,22 @@ type Meta struct {
 }
 
 // ParseFile parses TOML front matter and extracts only date and tags fields.
-func ParseFile(path string) (Meta, error) {
-	f, err := os.Open(path) // #nosec G304 -- caller-controlled path is required for content scan.
+func ParseFile(path string) (meta Meta, err error) {
+	cleanPath := filepath.Clean(path)
+	f, err := os.Open(cleanPath)
 	if err != nil {
-		return Meta{}, errs.Wrap(err, errs.WithContext("path", path))
+		return Meta{}, errs.Wrap(err, errs.WithContext("path", cleanPath))
 	}
 	defer func() {
-		_ = f.Close()
+		if cerr := f.Close(); cerr != nil {
+			err = errs.Join(err, errs.Wrap(cerr, errs.WithContext("path", cleanPath)))
+		}
 	}()
 
 	s := bufio.NewScanner(f)
 	s.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 
-	meta := Meta{}
+	meta = Meta{}
 	fmCount := 0
 	inTags := false
 
@@ -75,7 +79,7 @@ func ParseFile(path string) (Meta, error) {
 		}
 	}
 	if err := s.Err(); err != nil {
-		return Meta{}, errs.Wrap(err, errs.WithContext("path", path))
+		return Meta{}, errs.Wrap(err, errs.WithContext("path", cleanPath))
 	}
 
 	return meta, nil
