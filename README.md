@@ -1,123 +1,38 @@
-# tagtools
+# [tagtools] -- A small CLI for Hugo tag metadata workflows
 
-A small CLI toolset for Hugo tag metadata workflows.
+[![ci status](https://github.com/spiegel-im-spiegel/tagtools/workflows/ci/badge.svg)](https://github.com/spiegel-im-spiegel/tagtools/actions)
+[![build status](https://github.com/spiegel-im-spiegel/tagtools/workflows/build/badge.svg)](https://github.com/spiegel-im-spiegel/tagtools/actions)
+[![CodeQL status](https://github.com/spiegel-im-spiegel/tagtools/workflows/CodeQL/badge.svg)](https://github.com/spiegel-im-spiegel/tagtools/actions)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/spiegel-im-spiegel/tagtools/main/LICENSE)
+[![GitHub release](http://img.shields.io/github/release/spiegel-im-spiegel/tagtools.svg)](https://github.com/spiegel-im-spiegel/tagtools/releases/latest)
 
-This repository is the standalone home of `tagtools`, migrated from `spiegel-im-spiegel/github-pages-env`.
+This package is required Go 1.26 or later.
 
-## Features
+## Build and Install
 
-- Generate `.github/workflows/tagslist.csv` from front matter tags.
-- Generate `data/toptags.json` from posts in the last year.
-- Verify generated outputs against golden files.
-- Emit machine-readable verify output with `--debug`.
-
-## Requirements
-
-- Go 1.26+
-
-## Build
-
-```bash
-go build -o ./bin/tagtools .
+```
+$ go install github.com/spiegel-im-spiegel/tagtools@latest
 ```
 
-or install directly:
+## Binaries
 
-```bash
-go install github.com/spiegel-im-spiegel/tagtools@latest
-```
+See [latest release](https://github.com/spiegel-im-spiegel/tagtools/releases/latest).
 
-## Commands
+## Usage
 
-### tagslist
+See below manuals for usage details.
 
-Generate tag counts and preserve `means` values from an existing CSV.
-
-```bash
-./bin/tagtools tagslist \
-  --content-dir ./content \
-  --out ./.github/workflows/tagslist.csv \
-  --inherit-means-from ./.github/workflows/tagslist.csv
-```
-
-### toptags
-
-Generate sorted top tags from posts in the last year.
-
-```bash
-./bin/tagtools toptags \
-  --content-dir ./content \
-  --out ./data/toptags.json \
-  --top-n 15 \
-  --today 2026-05-18
-```
-
-### all
-
-Run `toptags` and then `tagslist` with default settings.
-
-```bash
-./bin/tagtools all
-```
-
-### verify
-
-Compare generated outputs against expected files.
-
-```bash
-./bin/tagtools verify \
-  --content-dir testdata/content \
-  --expected-tagslist testdata/golden/tagslist.csv \
-  --expected-toptags testdata/golden/toptags.json \
-  --inherit-means-from testdata/inherit/tagslist.csv \
-  --today 2026-05-18
-```
-
-When verification fails, the output includes:
-
-- stage (`tagslist` or `toptags`)
-- expected and actual file paths
-- first different line
-- expected/actual line excerpts
-- a `reproduce:` command
-
-## Debug JSON output
-
-Add `--debug` to `verify` for JSON output.
-
-```bash
-./bin/tagtools verify --debug \
-  --content-dir testdata/content \
-  --expected-tagslist testdata/golden/tagslist.csv \
-  --expected-toptags testdata/golden/toptags.json \
-  --inherit-means-from testdata/inherit/tagslist.csv \
-  --today 2026-05-18
-```
-
-Success example:
-
-```json
-{"status":"ok","reproduce_command":"./bin/tagtools verify ... --debug"}
-```
-
-Failure example:
-
-```json
-{
-  "status": "error",
-  "stage": "toptags",
-  "message": "toptags verification failed (first diff line: 1)",
-  "expected_path": "testdata/golden/toptags.json",
-  "actual_path": "/tmp/tagtools-verify-xxxx/toptags.json",
-  "line": 1,
-  "expected_line": "...",
-  "actual_line": "...",
-  "reproduce_command": "./bin/tagtools verify ... --debug"
-}
-```
+- English: [manual.md](./manual.md)
+- Japanese: [manual.ja.md](./manual.ja.md)
 
 ## Test
 
-```bash
-task test
 ```
+$ task test
+```
+
+## Modules Requirement Graph
+
+[![dependency.png](./dependency.png)](./dependency.png)
+
+[tagtools]: https://github.com/spiegel-im-spiegel/tagtools "spiegel-im-spiegel/tagtools: A small CLI for Hugo tag metadata workflows"
