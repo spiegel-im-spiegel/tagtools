@@ -1,37 +1,37 @@
 # tagtools
 
-A small CLI toolset for Hugo tag metadata workflows.
+Hugo タグ運用向けの小さな CLI ツールです。
 
-This repository is the standalone home of `tagtools`, migrated from `spiegel-im-spiegel/github-pages-env`.
+このリポジトリは `spiegel-im-spiegel/github-pages-env` から独立化した `tagtools` の本体です。
 
-## Features
+## 機能
 
-- Generate `.github/workflows/tagslist.csv` from front matter tags.
-- Generate `data/toptags.json` from posts in the last year.
-- Verify generated outputs against golden files.
-- Emit machine-readable verify output with `--debug`.
+- front matter の tags から `.github/workflows/tagslist.csv` を生成します。
+- 直近1年の記事から `data/toptags.json` を生成します。
+- 生成結果を golden ファイルと比較する verify を提供します。
+- verify は `--debug` 指定で JSON 形式の結果を出力できます。
 
-## Requirements
+## 前提
 
-- Go 1.26+
+- Go 1.26 以上
 
-## Build
+## ビルド
 
 ```bash
 go build -o ./bin/tagtools .
 ```
 
-or install directly:
+または直接インストール:
 
 ```bash
 go install github.com/spiegel-im-spiegel/tagtools@latest
 ```
 
-## Commands
+## コマンド
 
 ### tagslist
 
-Generate tag counts and preserve `means` values from an existing CSV.
+タグ件数を集計し，既存 CSV の `means` を引き継いで出力します。
 
 ```bash
 ./bin/tagtools tagslist \
@@ -42,7 +42,7 @@ Generate tag counts and preserve `means` values from an existing CSV.
 
 ### toptags
 
-Generate sorted top tags from posts in the last year.
+直近1年の記事から上位タグを集計し，タグ名配列を出力します。
 
 ```bash
 ./bin/tagtools toptags \
@@ -54,7 +54,7 @@ Generate sorted top tags from posts in the last year.
 
 ### all
 
-Run `toptags` and then `tagslist` with default settings.
+既定値で `toptags` -> `tagslist` の順に実行します。
 
 ```bash
 ./bin/tagtools all
@@ -62,7 +62,7 @@ Run `toptags` and then `tagslist` with default settings.
 
 ### verify
 
-Compare generated outputs against expected files.
+生成結果を期待ファイルと比較します。
 
 ```bash
 ./bin/tagtools verify \
@@ -73,17 +73,17 @@ Compare generated outputs against expected files.
   --today 2026-05-18
 ```
 
-When verification fails, the output includes:
+失敗時は次の情報を表示します。
 
-- stage (`tagslist` or `toptags`)
-- expected and actual file paths
-- first different line
-- expected/actual line excerpts
-- a `reproduce:` command
+- 失敗ステージ（`tagslist` または `toptags`）
+- expected/actual のファイルパス
+- 最初に差分が出た行番号
+- expected/actual 行の抜粋
+- `reproduce:` で始まる再現コマンド
 
-## Debug JSON output
+## --debug の JSON 出力
 
-Add `--debug` to `verify` for JSON output.
+`verify` に `--debug` を付けると JSON 形式で出力します。
 
 ```bash
 ./bin/tagtools verify --debug \
@@ -94,13 +94,13 @@ Add `--debug` to `verify` for JSON output.
   --today 2026-05-18
 ```
 
-Success example:
+成功時の例:
 
 ```json
 {"status":"ok","reproduce_command":"./bin/tagtools verify ... --debug"}
 ```
 
-Failure example:
+失敗時の例:
 
 ```json
 {
@@ -116,7 +116,7 @@ Failure example:
 }
 ```
 
-## Test
+## テスト
 
 ```bash
 task test

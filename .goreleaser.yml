@@ -1,0 +1,63 @@
+version: 2
+
+project_name: tagtools
+release:
+  github:
+    owner: spiegel-im-spiegel
+    name: tagtools
+
+builds:
+-
+  env:
+  - GO111MODULE=on
+  - CGO_ENABLED=0
+  goos:
+  - linux
+  - darwin
+  - windows
+  - freebsd
+  goarch:
+  - amd64
+  - arm64
+  - riscv64
+  main: ./
+  flags:
+  - -trimpath
+  ldflags: -s -w -X github.com/spiegel-im-spiegel/tagtools/main.Version=v{{ .Version }}
+  binary: tagtools
+
+archives:
+-
+  formats: ["tar.gz"]
+  format_overrides:
+    - goos: windows
+      formats: ["zip"]
+  name_template: >-
+    {{ .Binary }}_
+    {{- .Version }}_
+    {{- if eq .Os "freebsd" }}FreeBSD
+    {{- else }}{{ title .Os }}{{ end }}_
+    {{- if eq .Arch "amd64" }}64bit
+    {{- else if eq .Arch "386" }}32bit
+    {{- else if eq .Arch "arm64" }}ARM64
+    {{- else if eq .Arch "riscv64" }}RISCV
+    {{- else }}{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ end }}
+  files:
+  - LICENSE*
+  - README*
+  - dependency.png
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - docs
+      - typo
+      - Merge pull request
+      - Merge branch
+
+snapshot:
+  version_template: SNAPSHOT-{{ .Commit }}
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
