@@ -9,7 +9,7 @@ import (
 
 	"github.com/goark/errs"
 
-	"github.com/spiegel-im-spiegel/tagtools/internal/frontmatter"
+	"github.com/spiegel-im-spiegel/tagtools/internal/contents"
 )
 
 // Config represents toptags command options.
@@ -48,21 +48,7 @@ func Run(cfg Config) (err error) {
 	}
 
 	counts := map[string]int{}
-	err = filepath.WalkDir(cfg.ContentDir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return errs.Wrap(err, errs.WithContext("path", path))
-		}
-		if d.IsDir() {
-			return nil
-		}
-		if filepath.Ext(path) != ".md" {
-			return nil
-		}
-
-		meta, err := frontmatter.ParseFile(path)
-		if err != nil {
-			return errs.Wrap(err)
-		}
+	err = contents.WalkMarkdownMeta(cfg.ContentDir, func(_ string, meta contents.Meta) error {
 		if meta.Date == "" {
 			return nil
 		}
