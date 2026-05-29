@@ -7,7 +7,7 @@ This repository is the standalone home of `tagtools`, migrated from `spiegel-im-
 ## Features
 
 - Generate `.github/workflows/tagslist.csv` from front matter tags.
-- Generate `data/toptags.json` from posts in the last year.
+- Generate `data/toptags.json` from posts in a configurable window (default: last year).
 - Verify generated outputs against golden files.
 - Emit machine-readable verify output with `--debug`.
 
@@ -42,14 +42,15 @@ Generate tag counts and preserve `means` values from an existing CSV.
 
 ### toptags
 
-Generate sorted top tags from posts in the last year.
+Generate sorted top tags from posts in a configurable window (`y`, `m`, `d`; e.g. `1y`, `6m`, `90d`, `1y2m10d`).
 
 ```bash
 ./bin/tagtools toptags \
   --content-dir ./content \
   --out ./data/toptags.json \
   --top-n 15 \
-  --today 2026-05-18
+  --today 2026-05-18 \
+  --window 1y
 ```
 
 ### all

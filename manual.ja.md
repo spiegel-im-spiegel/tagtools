@@ -7,7 +7,7 @@ Hugo タグ運用向けの小さな CLI ツールです。
 ## 機能
 
 - front matter の tags から `.github/workflows/tagslist.csv` を生成します。
-- 直近1年の記事から `data/toptags.json` を生成します。
+- 指定ウィンドウ（既定: 直近1年）内の記事から `data/toptags.json` を生成します。
 - 生成結果を golden ファイルと比較する verify を提供します。
 - verify は `--debug` 指定で JSON 形式の結果を出力できます。
 
@@ -42,14 +42,15 @@ go install github.com/spiegel-im-spiegel/tagtools@latest
 
 ### toptags
 
-直近1年の記事から上位タグを集計し，タグ名配列を出力します。
+指定ウィンドウ（`y`/`m`/`d`、例: `1y`, `6m`, `90d`, `1y2m10d`）内の記事から上位タグを集計し，タグ名配列を出力します。
 
 ```bash
 ./bin/tagtools toptags \
   --content-dir ./content \
   --out ./data/toptags.json \
   --top-n 15 \
-  --today 2026-05-18
+  --today 2026-05-18 \
+  --window 1y
 ```
 
 ### all

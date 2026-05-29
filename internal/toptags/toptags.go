@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/goark/errs"
@@ -18,7 +19,7 @@ type Config struct {
 	Out        string `pflag:"out,o,output JSON path" env:"OUT"`
 	TopN       int    `pflag:"top-n,n,number of top tags" env:"TOP_N"`
 	Today      string `pflag:"today,t,override today date (YYYY-MM-DD)" env:"TODAY"`
-	Window     string `pflag:"window,w,window duration (currently only 1y)" env:"WINDOW"`
+	Window     string `pflag:"window,w,window duration (e.g. 1y, 6m, 90d, 1y2m10d)" env:"WINDOW"`
 }
 
 func DefaultConfig() Config {
@@ -152,10 +153,43 @@ func resolveToday(s string) (time.Time, error) {
 }
 
 func resolveCutoff(today time.Time, window string) (time.Time, error) {
-	switch window {
-	case "1y":
-		return today.AddDate(-1, 0, 0), nil
-	default:
-		return time.Time{}, errs.New("unsupported window", errs.WithContext("window", window))
+	years, months, days, err := parseWindow(window)
+	if err != nil {
+		return time.Time{}, errs.Wrap(err, errs.WithContext("window", window))
 	}
+	return today.AddDate(-years, -months, -days), nil
+}
+
+func parseWindow(s string) (int, int, int, error) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return 0, 0, 0, errs.New("window is empty")
+	}
+
+	years, months, days := 0, 0, 0
+	for i := 0; i < len(s); {
+		start := i
+		for i < len(s) && s[i] >= '0' && s[i] <= '9' {
+			i++
+		}
+		if start == i || i >= len(s) {
+			return 0, 0, 0, errs.New("invalid window format")
+		}
+		n, err := strconv.Atoi(s[start:i])
+		if err != nil {
+			return 0, 0, 0, errs.Wrap(err)
+		}
+		switch s[i] {
+		case 'y':
+			years += n
+		case 'm':
+			months += n
+		case 'd':
+			days += n
+		default:
+			return 0, 0, 0, errs.New("invalid window unit", errs.WithContext("unit", string(s[i])))
+		}
+		i++
+	}
+	return years, months, days, nil
 }

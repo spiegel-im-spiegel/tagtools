@@ -24,7 +24,7 @@ type Config struct {
 	InheritMeansFrom string `pflag:"inherit-means-from,m,CSV path to inherit means from" env:"INHERIT_MEANS_FROM"`
 	TopN             int    `pflag:"top-n,n,number of top tags" env:"TOP_N"`
 	Today            string `pflag:"today,t,override today date (YYYY-MM-DD)" env:"TODAY"`
-	Window           string `pflag:"window,w,window duration (currently only 1y)" env:"WINDOW"`
+	Window           string `pflag:"window,w,window duration (e.g. 1y, 6m, 90d, 1y2m10d)" env:"WINDOW"`
 	Debug            bool   `pflag:"debug,d,output verify result as JSON" env:"DEBUG"`
 }
 
