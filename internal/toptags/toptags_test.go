@@ -18,9 +18,11 @@ func TestResolveCutoff(t *testing.T) {
 		{name: "month", window: "6m", want: time.Date(2025, 11, 29, 0, 0, 0, 0, time.UTC)},
 		{name: "day", window: "90d", want: time.Date(2026, 2, 28, 0, 0, 0, 0, time.UTC)},
 		{name: "composite", window: "1y2m10d", want: time.Date(2025, 3, 19, 0, 0, 0, 0, time.UTC)},
+		{name: "zero value", window: "0y", want: today},
 		{name: "invalid unit", window: "1w", wantErr: true},
 		{name: "missing unit", window: "10", wantErr: true},
 		{name: "empty", window: "", wantErr: true},
+		{name: "negative sign", window: "-1y", wantErr: true},
 	}
 
 	for _, tt := range tests {

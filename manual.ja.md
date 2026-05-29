@@ -43,6 +43,7 @@ go install github.com/spiegel-im-spiegel/tagtools@latest
 ### toptags
 
 指定ウィンドウ（`y`/`m`/`d`、例: `1y`, `6m`, `90d`, `1y2m10d`）内の記事から上位タグを集計し，タグ名配列を出力します。
+ゼロ値（例: `0d`）を指定すると当日の記事のみが対象になります。
 
 ```bash
 ./bin/tagtools toptags \
