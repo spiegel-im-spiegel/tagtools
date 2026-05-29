@@ -43,6 +43,7 @@ Generate tag counts and preserve `means` values from an existing CSV.
 ### toptags
 
 Generate sorted top tags from posts in a configurable window (`y`, `m`, `d`; e.g. `1y`, `6m`, `90d`, `1y2m10d`).
+A zero value (e.g. `0d`) limits the window to today only.
 
 ```bash
 ./bin/tagtools toptags \
