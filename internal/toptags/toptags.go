@@ -96,31 +96,44 @@ func Run(cfg Config) (err error) {
 	if err := os.MkdirAll(filepath.Dir(cfg.Out), 0o750); err != nil {
 		return errs.Wrap(err, errs.WithContext("path", cfg.Out))
 	}
-	f, err := os.Create(cfg.Out)
+	outDir := filepath.Dir(cfg.Out)
+	tmp, err := os.CreateTemp(outDir, "toptags-*.json")
 	if err != nil {
-		return errs.Wrap(err, errs.WithContext("path", cfg.Out))
+		return errs.Wrap(err, errs.WithContext("path", outDir))
 	}
+	tmpPath := tmp.Name()
 	defer func() {
-		if cerr := f.Close(); cerr != nil {
-			err = errs.Join(err, errs.Wrap(cerr, errs.WithContext("path", cfg.Out)))
+		_ = os.Remove(tmpPath)
+		if tmp == nil {
+			return
+		}
+		if cerr := tmp.Close(); cerr != nil {
+			err = errs.Join(err, errs.Wrap(cerr, errs.WithContext("path", tmpPath)))
 		}
 	}()
 
-	if _, err := f.WriteString("["); err != nil {
+	if _, err := tmp.WriteString("["); err != nil {
 		return errs.Wrap(err)
 	}
 	for i, t := range tags {
 		if i > 0 {
-			if _, err := f.WriteString(", "); err != nil {
+			if _, err := tmp.WriteString(", "); err != nil {
 				return errs.Wrap(err)
 			}
 		}
-		if _, err := f.WriteString(strconv.Quote(t)); err != nil {
+		if _, err := tmp.WriteString(strconv.Quote(t)); err != nil {
 			return errs.Wrap(err)
 		}
 	}
-	if _, err := f.WriteString("]\n"); err != nil {
+	if _, err := tmp.WriteString("]\n"); err != nil {
 		return errs.Wrap(err)
+	}
+	if err := tmp.Close(); err != nil {
+		return errs.Wrap(err, errs.WithContext("path", tmpPath))
+	}
+	tmp = nil
+	if err := os.Rename(tmpPath, cfg.Out); err != nil {
+		return errs.Wrap(err, errs.WithContext("path", cfg.Out))
 	}
 
 	return nil
