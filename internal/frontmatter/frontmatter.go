@@ -1,19 +1,13 @@
 package frontmatter
 
 import (
-	"bufio"
+	"bytes"
 	"os"
 	"path/filepath"
-	"regexp"
+	"time"
 
+	"github.com/adrg/frontmatter"
 	"github.com/goark/errs"
-)
-
-var (
-	reDateLine = regexp.MustCompile(`^date\s*=`)
-	reDate     = regexp.MustCompile(`"([0-9]{4}-[0-9]{2}-[0-9]{2})`)
-	reTagsLine = regexp.MustCompile(`^tags\s*=`)
-	reQuoted   = regexp.MustCompile(`"[^"]+"`)
 )
 
 // Meta holds front matter fields used by tagtools.
@@ -22,85 +16,81 @@ type Meta struct {
 	Tags []string
 }
 
+type parsedMeta struct {
+	Date any `yaml:"date" toml:"date" json:"date"`
+	Tags any `yaml:"tags" toml:"tags" json:"tags"`
+}
+
 // ParseFile parses TOML front matter and extracts only date and tags fields.
 func ParseFile(path string) (meta Meta, err error) {
 	cleanPath := filepath.Clean(path)
-	f, err := os.Open(cleanPath)
+	data, err := os.ReadFile(cleanPath)
 	if err != nil {
 		return Meta{}, errs.Wrap(err, errs.WithContext("path", cleanPath))
 	}
-	defer func() {
-		if cerr := f.Close(); cerr != nil {
-			err = errs.Join(err, errs.Wrap(cerr, errs.WithContext("path", cleanPath)))
-		}
-	}()
 
-	s := bufio.NewScanner(f)
-	s.Buffer(make([]byte, 0, 64*1024), 1024*1024)
-
-	meta = Meta{}
-	fmCount := 0
-	inTags := false
-
-	for s.Scan() {
-		line := s.Text()
-
-		if line == "+++" {
-			fmCount++
-			if fmCount >= 2 {
-				break
-			}
-			continue
-		}
-		if fmCount != 1 {
-			continue
-		}
-
-		if reDateLine.MatchString(line) {
-			m := reDate.FindStringSubmatch(line)
-			if len(m) > 1 {
-				meta.Date = m[1]
-			}
-		}
-
-		if inTags {
-			meta.Tags = append(meta.Tags, extractQuoted(line)...)
-			if hasArrayEnd(line) {
-				inTags = false
-			}
-			continue
-		}
-
-		if reTagsLine.MatchString(line) {
-			meta.Tags = append(meta.Tags, extractQuoted(line)...)
-			if !hasArrayEnd(line) {
-				inTags = true
-			}
-		}
-	}
-	if err := s.Err(); err != nil {
+	var pm parsedMeta
+	if _, err := frontmatter.Parse(bytes.NewReader(data), &pm); err != nil {
 		return Meta{}, errs.Wrap(err, errs.WithContext("path", cleanPath))
+	}
+
+	meta = Meta{
+		Date: normalizeDate(pm.Date),
+		Tags: normalizeTags(pm.Tags),
 	}
 
 	return meta, nil
 }
 
-func extractQuoted(line string) []string {
-	matches := reQuoted.FindAllString(line, -1)
-	res := make([]string, 0, len(matches))
-	for _, m := range matches {
-		if len(m) >= 2 {
-			res = append(res, m[1:len(m)-1])
+func normalizeDate(v any) string {
+	switch d := v.(type) {
+	case nil:
+		return ""
+	case string:
+		for _, layout := range []string{"2006-01-02", time.RFC3339, "2006-01-02T15:04:05"} {
+			if t, err := time.Parse(layout, d); err == nil {
+				return t.Format("2006-01-02")
+			}
 		}
+		if len(d) >= 10 {
+			if _, err := time.Parse("2006-01-02", d[:10]); err == nil {
+				return d[:10]
+			}
+		}
+		return ""
+	case time.Time:
+		return d.Format("2006-01-02")
+	default:
+		return ""
 	}
-	return res
 }
 
-func hasArrayEnd(line string) bool {
-	for i := 0; i < len(line); i++ {
-		if line[i] == ']' {
-			return true
+func normalizeTags(v any) []string {
+	switch tags := v.(type) {
+	case nil:
+		return nil
+	case []string:
+		res := make([]string, 0, len(tags))
+		for _, t := range tags {
+			if t != "" {
+				res = append(res, t)
+			}
 		}
+		return res
+	case []any:
+		res := make([]string, 0, len(tags))
+		for _, t := range tags {
+			if s, ok := t.(string); ok && s != "" {
+				res = append(res, s)
+			}
+		}
+		return res
+	case string:
+		if tags == "" {
+			return nil
+		}
+		return []string{tags}
+	default:
+		return nil
 	}
-	return false
 }

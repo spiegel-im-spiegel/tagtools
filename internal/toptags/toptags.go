@@ -14,11 +14,11 @@ import (
 
 // Config represents toptags command options.
 type Config struct {
-	ContentDir string `pflag:"content-dir,c,content directory to scan"`
-	Out        string `pflag:"out,o,output JSON path"`
-	TopN       int    `pflag:"top-n,n,number of top tags"`
-	Today      string `pflag:"today,t,override today date (YYYY-MM-DD)"`
-	Window     string `pflag:"window,w,window duration (currently only 1y)"`
+	ContentDir string `pflag:"content-dir,c,content directory to scan" env:"CONTENT_DIR"`
+	Out        string `pflag:"out,o,output JSON path" env:"OUT"`
+	TopN       int    `pflag:"top-n,n,number of top tags" env:"TOP_N"`
+	Today      string `pflag:"today,t,override today date (YYYY-MM-DD)" env:"TODAY"`
+	Window     string `pflag:"window,w,window duration (currently only 1y)" env:"WINDOW"`
 }
 
 func DefaultConfig() Config {
