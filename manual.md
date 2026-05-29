@@ -73,6 +73,19 @@ Compare generated outputs against expected files.
   --today 2026-05-18
 ```
 
+## Environment variables
+
+You can override command options via environment variables with the `TAGTOOLS_` prefix.
+Flags still take precedence over environment variables.
+
+Examples:
+
+- `TAGTOOLS_TOP_N=20`
+- `TAGTOOLS_TODAY=2026-05-18`
+- `TAGTOOLS_CONTENT_DIR=./content`
+- `TAGTOOLS_INHERIT_MEANS_FROM=./.github/workflows/tagslist.csv`
+- `TAGTOOLS_DEBUG=true` (for `verify`)
+
 When verification fails, the output includes:
 
 - stage (`tagslist` or `toptags`)

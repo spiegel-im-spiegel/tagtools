@@ -15,9 +15,9 @@ import (
 
 // Config represents tagslist command options.
 type Config struct {
-	ContentDir       string `pflag:"content-dir,c,content directory to scan"`
-	Out              string `pflag:"out,o,output CSV path"`
-	InheritMeansFrom string `pflag:"inherit-means-from,m,CSV path to inherit means from"`
+	ContentDir       string `pflag:"content-dir,c,content directory to scan" env:"CONTENT_DIR"`
+	Out              string `pflag:"out,o,output CSV path" env:"OUT"`
+	InheritMeansFrom string `pflag:"inherit-means-from,m,CSV path to inherit means from" env:"INHERIT_MEANS_FROM"`
 }
 
 func DefaultConfig() Config {

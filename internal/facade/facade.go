@@ -21,6 +21,8 @@ var (
 	Name = "tagtools"
 )
 
+const envPrefix = "TAGTOOLS_"
+
 type jsonOutputError struct {
 	Payload string
 }
@@ -71,6 +73,9 @@ func run(ui *rwi.RWI, args []string) error {
 	switch subcmd {
 	case "tagslist":
 		cfg := tagslist.DefaultConfig()
+		if err := struct2pflag.BindEnv(&cfg, struct2pflag.WithEnvPrefix(envPrefix)); err != nil {
+			return errs.Wrap(err)
+		}
 		fs := pflag.NewFlagSet("tagslist", pflag.ContinueOnError)
 		fs.SetOutput(ui.Writer())
 		struct2pflag.Bind(fs, &cfg)
@@ -87,6 +92,9 @@ func run(ui *rwi.RWI, args []string) error {
 		return nil
 	case "toptags":
 		cfg := toptags.DefaultConfig()
+		if err := struct2pflag.BindEnv(&cfg, struct2pflag.WithEnvPrefix(envPrefix)); err != nil {
+			return errs.Wrap(err)
+		}
 		fs := pflag.NewFlagSet("toptags", pflag.ContinueOnError)
 		fs.SetOutput(ui.Writer())
 		struct2pflag.Bind(fs, &cfg)
@@ -102,16 +110,27 @@ func run(ui *rwi.RWI, args []string) error {
 		_ = ui.Outputln("Updated", cfg.Out)
 		return nil
 	case "all":
-		if err := toptags.Run(toptags.DefaultConfig()); err != nil {
+		topcfg := toptags.DefaultConfig()
+		if err := struct2pflag.BindEnv(&topcfg, struct2pflag.WithEnvPrefix(envPrefix)); err != nil {
 			return errs.Wrap(err)
 		}
-		if err := tagslist.Run(tagslist.DefaultConfig()); err != nil {
+		if err := toptags.Run(topcfg); err != nil {
+			return errs.Wrap(err)
+		}
+		tagscfg := tagslist.DefaultConfig()
+		if err := struct2pflag.BindEnv(&tagscfg, struct2pflag.WithEnvPrefix(envPrefix)); err != nil {
+			return errs.Wrap(err)
+		}
+		if err := tagslist.Run(tagscfg); err != nil {
 			return errs.Wrap(err)
 		}
 		_ = ui.Outputln("Updated data/toptags.json and .github/workflows/tagslist.csv")
 		return nil
 	case "verify":
 		cfg := verify.DefaultConfig()
+		if err := struct2pflag.BindEnv(&cfg, struct2pflag.WithEnvPrefix(envPrefix)); err != nil {
+			return errs.Wrap(err)
+		}
 		fs := pflag.NewFlagSet("verify", pflag.ContinueOnError)
 		fs.SetOutput(ui.Writer())
 		struct2pflag.Bind(fs, &cfg)

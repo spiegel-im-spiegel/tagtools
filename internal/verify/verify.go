@@ -18,14 +18,14 @@ import (
 
 // Config represents verify command options.
 type Config struct {
-	ContentDir       string `pflag:"content-dir,c,content directory to scan"`
-	ExpectedTagslist string `pflag:"expected-tagslist,,expected tagslist CSV path"`
-	ExpectedToptags  string `pflag:"expected-toptags,,expected toptags JSON path"`
-	InheritMeansFrom string `pflag:"inherit-means-from,m,CSV path to inherit means from"`
-	TopN             int    `pflag:"top-n,n,number of top tags"`
-	Today            string `pflag:"today,t,override today date (YYYY-MM-DD)"`
-	Window           string `pflag:"window,w,window duration (currently only 1y)"`
-	Debug            bool   `pflag:"debug,d,output verify result as JSON"`
+	ContentDir       string `pflag:"content-dir,c,content directory to scan" env:"CONTENT_DIR"`
+	ExpectedTagslist string `pflag:"expected-tagslist,,expected tagslist CSV path" env:"EXPECTED_TAGSLIST"`
+	ExpectedToptags  string `pflag:"expected-toptags,,expected toptags JSON path" env:"EXPECTED_TOPTAGS"`
+	InheritMeansFrom string `pflag:"inherit-means-from,m,CSV path to inherit means from" env:"INHERIT_MEANS_FROM"`
+	TopN             int    `pflag:"top-n,n,number of top tags" env:"TOP_N"`
+	Today            string `pflag:"today,t,override today date (YYYY-MM-DD)" env:"TODAY"`
+	Window           string `pflag:"window,w,window duration (currently only 1y)" env:"WINDOW"`
+	Debug            bool   `pflag:"debug,d,output verify result as JSON" env:"DEBUG"`
 }
 
 func DefaultConfig() Config {

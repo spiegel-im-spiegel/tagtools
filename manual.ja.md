@@ -73,6 +73,19 @@ go install github.com/spiegel-im-spiegel/tagtools@latest
   --today 2026-05-18
 ```
 
+## 環境変数
+
+`TAGTOOLS_` プレフィックス付きの環境変数で各オプションを上書きできます。
+優先順位は `flag > env > default` です。
+
+例:
+
+- `TAGTOOLS_TOP_N=20`
+- `TAGTOOLS_TODAY=2026-05-18`
+- `TAGTOOLS_CONTENT_DIR=./content`
+- `TAGTOOLS_INHERIT_MEANS_FROM=./.github/workflows/tagslist.csv`
+- `TAGTOOLS_DEBUG=true`（`verify` 用）
+
 失敗時は次の情報を表示します。
 
 - 失敗ステージ（`tagslist` または `toptags`）
